@@ -43,8 +43,7 @@ void createLFSGroupIfNotExist() {
 	if (lfsGroupEntry == NULL) {
 		if (grpReturnCode == 0) {
 			printf("Could not find the lfs group in /etc/groups. Creating it...\n");
-			char *argv_list[] = {"lfs"};
-			execv("groupadd", argv_list);
+			system("groupadd lfs");
 		}
 		else {
 			errno = grpReturnCode;
@@ -80,8 +79,7 @@ struct passwd getLFSPasswdEntry() {
 	if (lfsPasswdEntry == NULL) {
 		if (pwdReturnCode == 0) {
 			printf("Could not find the lfs user in /etc/passwd. Creating it...\n");
-			char *argv_list[] = {"-s", "/bin/bash", "-g", "lfs", "-m", "-k","/dev/null", "lfs"};
-			execv("useradd", argv_list);
+			system("useradd -s /bin/bash -g lfs -m -k /dev/null lfs");
 			goto loadLFSUser;
 		}
 		else {
