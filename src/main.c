@@ -78,7 +78,7 @@ struct passwd getLFSPasswdEntry() {
 
 	if (lfsPasswdEntry == NULL) {
 		if (pwdReturnCode == 0) {
-			perror("Could not find the lfs user in /etc/passwd");
+			printf("Could not find the lfs user in /etc/passwd. Creating it...\n");
 			char *argv_list[] = {"-s", "/bin/bash", "-g", "lfs", "-m", "-k","/dev/null", "lfs"};
 			execv("useradd", argv_list);
 			goto loadLFSUser;
