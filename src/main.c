@@ -42,6 +42,7 @@ void createLFSGroupIfNotExist() {
 
 	if (lfsGroupEntry == NULL) {
 		if (grpReturnCode == 0) {
+			printf("Could not find the lfs group in /etc/groups. Creating it...\n");
 			char *argv_list[] = {"lfs"};
 			execv("groupadd", argv_list);
 		}
