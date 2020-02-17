@@ -99,10 +99,24 @@ int main() {
 	requireRoot();
 
 	struct passwd lfsPasswdEntry;
-	lfsPasswdEntry = getLFSPasswdEntry();
-	setuid(lfsPasswdEntry.pw_uid);
-	setgid(lfsPasswdEntry.pw_gid);
+	int setUIDReturnCode;
+	int setGIDReturnCode;
 	int pid;
+
+	lfsPasswdEntry = getLFSPasswdEntry();
+
+	setGIDReturnCode = setgid(lfsPasswdEntry.pw_gid);
+	if (setGIDReturnCode != 0) {
+		perror("setgid");
+		exit(EXIT_FAILURE);
+	}
+
+	setUIDReturnCode = setuid(lfsPasswdEntry.pw_uid);
+	if (setUIDReturnCode != 0) {
+		perror("setuid");
+		exit(EXIT_FAILURE);
+	}
+
 	pid = fork();
 	if (pid == -1) {
 		perror("fork");
