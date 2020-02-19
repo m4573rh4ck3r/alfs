@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
-
+#include <string.h>
 #define LFS "/mnt/lfs"
 
 void requireRoot() {
@@ -16,6 +17,45 @@ void requireRoot() {
 		errno = EPERM;
 		perror("alfs");
 		exit(EXIT_FAILURE);
+	}
+}
+
+void createLFSDirIfNotExist() {
+	struct stat st = {0};
+
+	if (stat(LFS, &st) == -1) {
+		mkdir(LFS, 0700);
+		printf("created directory %s\n", LFS);
+	}
+}
+
+void createToolsDirIfNotExist() {
+	createLFSDirIfNotExist();
+
+	struct stat st = {0};
+	char toolsDir[14];
+
+	strcat(toolsDir, LFS);
+	strcat(toolsDir, "/tools");
+
+	if (stat(toolsDir, &st) == -1) {
+		mkdir(toolsDir, 0700);
+		printf("created directory %s\n", toolsDir);
+	}
+}
+
+void createSourcesDirIfNotExist() {
+	createLFSDirIfNotExist();
+
+	struct stat st = {0};
+	char sourcesDir[16];
+
+	strcat(sourcesDir, LFS);
+	strcat(sourcesDir, "/sources");
+
+	if (stat(sourcesDir, &st) == -1) {
+		mkdir(sourcesDir, 0700);
+		printf("created directory %s\n", sourcesDir);
 	}
 }
 
@@ -95,6 +135,9 @@ struct passwd getLFSPasswdEntry() {
 
 int main() {
 	requireRoot();
+	createLFSDirIfNotExist();
+	createToolsDirIfNotExist();
+	createSourcesDirIfNotExist();
 
 	struct passwd lfsPasswdEntry;
 	int setUIDReturnCode;
