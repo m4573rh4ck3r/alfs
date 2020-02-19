@@ -8,6 +8,8 @@
 #include <grp.h>
 #include <errno.h>
 #include <string.h>
+#include "curlfile.h"
+#include "createlfsdirs.h"
 
 #define LFS "/mnt/lfs"
 #define TOOLSDIR "/mnt/lfs/tools"
@@ -20,7 +22,7 @@ void requireRoot() {
 		exit(EXIT_FAILURE);
 	}
 }
-
+/*
 void createLFSDirIfNotExist() {
 	int lfsDirReturnCode;
 
@@ -70,7 +72,7 @@ void createSourcesDirIfNotExist() {
 		perror(msg);
 		exit(EXIT_FAILURE);
 	}
-}
+}*/
 
 void createLFSGroupIfNotExist() {
 	char *buf;
@@ -174,6 +176,12 @@ int main() {
 		perror("setuid");
 		exit(EXIT_FAILURE);
 	}
+
+	char wgetListURL[100] = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/wget-list";
+	char md5sumsURL[100] = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/md5sums";
+
+	curlFile(wgetListURL);
+	curlFile(md5sumsURL);
 
 	// build tools
 	pid = fork();
