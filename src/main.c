@@ -22,9 +22,17 @@ void requireRoot() {
 
 void createLFSDirIfNotExist() {
 	struct stat st = {0};
+	int mkdirLFSDirReturnCode;
 
 	if (stat(LFS, &st) == -1) {
-		mkdir(LFS, 0700);
+		mkdirLFSDirReturnCode = mkdir(LFS, 0700);
+		if (mkdirLFSDirReturnCode == -1) {
+			printf("%s: directory already exists\n", LFS);
+		} else if(mkdirLFSDirReturnCode != 0) {
+			errno = mkdirLFSDirReturnCode;
+			perror("mkdir");
+			exit(EXIT_FAILURE);
+		}
 		printf("created directory %s\n", LFS);
 	}
 }
@@ -33,14 +41,27 @@ void createToolsDirIfNotExist() {
 	createLFSDirIfNotExist();
 
 	struct stat st = {0};
-	char toolsDir[14];
+	struct stat rootSt = {0};
+	char toolsDir[15];
+	int mkdirToolsDirReturnCode;
 
 	strcat(toolsDir, LFS);
 	strcat(toolsDir, "/tools");
 
 	if (stat(toolsDir, &st) == -1) {
-		mkdir(toolsDir, 0700);
+		mkdirToolsDirReturnCode = mkdir(toolsDir, 0700);
+		if (mkdirToolsDirReturnCode == -1) {
+			printf("%s: directory already exists\n", toolsDir);
+		} else if (mkdirToolsDirReturnCode != 0) {
+			errno = mkdirToolsDirReturnCode;
+			perror("mkdir");
+			exit(EXIT_FAILURE);
+		}
 		printf("created directory %s\n", toolsDir);
+	}
+
+	if (lstat("/root", &rootSt) == -1) {
+		symlink("/root", toolsDir);
 	}
 }
 
@@ -48,13 +69,21 @@ void createSourcesDirIfNotExist() {
 	createLFSDirIfNotExist();
 
 	struct stat st = {0};
-	char sourcesDir[16];
+	char sourcesDir[17];
+	int mkdirSourcesDirReturnCode;
 
 	strcat(sourcesDir, LFS);
 	strcat(sourcesDir, "/sources");
 
 	if (stat(sourcesDir, &st) == -1) {
-		mkdir(sourcesDir, 0700);
+		mkdirSourcesDirReturnCode = mkdir(sourcesDir, 0700);
+		if (mkdirSourcesDirReturnCode == -1) {
+			printf("%s: directory already exists\n", sourcesDir);
+		} else if(mkdirSourcesDirReturnCode != 0) {
+			errno = mkdirSourcesDirReturnCode;
+			perror("mkdir");
+			exit(EXIT_FAILURE);
+		}
 		printf("created directory %s\n", sourcesDir);
 	}
 }
