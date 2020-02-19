@@ -8,12 +8,13 @@
 #include <grp.h>
 #include <errno.h>
 #include <string.h>
+
 #define LFS "/mnt/lfs"
+#define TOOLSDIR "/mnt/lfs/tools"
+#define SOURCESDIR "/mnt/lfs/sources"
 
 void requireRoot() {
-	uid_t uid = getuid();
-
-	if (uid != 0) {
+	if (getuid() != 0) {
 		errno = EPERM;
 		perror("alfs");
 		exit(EXIT_FAILURE);
@@ -21,70 +22,53 @@ void requireRoot() {
 }
 
 void createLFSDirIfNotExist() {
-	struct stat st = {0};
-	int mkdirLFSDirReturnCode;
+	int lfsDirReturnCode;
 
-	if (stat(LFS, &st) == -1) {
-		mkdirLFSDirReturnCode = mkdir(LFS, 0700);
-		if (mkdirLFSDirReturnCode == -1) {
-			printf("%s: directory already exists\n", LFS);
-		} else if(mkdirLFSDirReturnCode != 0) {
-			errno = mkdirLFSDirReturnCode;
-			perror("mkdir");
-			exit(EXIT_FAILURE);
-		}
-		printf("created directory %s\n", LFS);
+	lfsDirReturnCode = mkdir(LFS, 0700);
+	if (lfsDirReturnCode == 0) {
+		printf("%s: directory created\n", LFS);
+	} else if(errno == EEXIST) {
+		printf("%s: directory exists\n", LFS);
+	} else {
+		char msg[100];
+		strcat(msg, "mkdir ");
+		strcat(msg, LFS);
+		perror(msg);
+		exit(EXIT_FAILURE);
 	}
 }
 
 void createToolsDirIfNotExist() {
-	createLFSDirIfNotExist();
+	int toolsDirReturnCode;
 
-	struct stat st = {0};
-	struct stat rootSt = {0};
-	char toolsDir[15];
-	int mkdirToolsDirReturnCode;
-
-	strcat(toolsDir, LFS);
-	strcat(toolsDir, "/tools");
-
-	if (stat(toolsDir, &st) == -1) {
-		mkdirToolsDirReturnCode = mkdir(toolsDir, 0700);
-		if (mkdirToolsDirReturnCode == -1) {
-			printf("%s: directory already exists\n", toolsDir);
-		} else if (mkdirToolsDirReturnCode != 0) {
-			errno = mkdirToolsDirReturnCode;
-			perror("mkdir");
-			exit(EXIT_FAILURE);
-		}
-		printf("created directory %s\n", toolsDir);
-	}
-
-	if (lstat("/root", &rootSt) == -1) {
-		symlink("/root", toolsDir);
+	toolsDirReturnCode = mkdir(TOOLSDIR, 0700);
+	if (toolsDirReturnCode == 0) {
+		printf("%s: directory created\n", TOOLSDIR);
+	} else if (errno == EEXIST) {
+		printf("%s: directory exists\n", TOOLSDIR);
+	} else {
+		char msg[100];
+		strcat(msg, "mkdir ");
+		strcat(msg, TOOLSDIR);
+		perror(msg);
+		exit(EXIT_FAILURE);
 	}
 }
 
 void createSourcesDirIfNotExist() {
-	createLFSDirIfNotExist();
+	int sourcesDirReturnCode;
 
-	struct stat st = {0};
-	char sourcesDir[17];
-	int mkdirSourcesDirReturnCode;
-
-	strcat(sourcesDir, LFS);
-	strcat(sourcesDir, "/sources");
-
-	if (stat(sourcesDir, &st) == -1) {
-		mkdirSourcesDirReturnCode = mkdir(sourcesDir, 0700);
-		if (mkdirSourcesDirReturnCode == -1) {
-			printf("%s: directory already exists\n", sourcesDir);
-		} else if(mkdirSourcesDirReturnCode != 0) {
-			errno = mkdirSourcesDirReturnCode;
-			perror("mkdir");
-			exit(EXIT_FAILURE);
-		}
-		printf("created directory %s\n", sourcesDir);
+	sourcesDirReturnCode = mkdir(SOURCESDIR, 0700);
+	if (sourcesDirReturnCode == 0) {
+		printf("%s: directory created\n", SOURCESDIR);
+	} else if (errno == EEXIST) {
+		printf("%s: directory exists\n", SOURCESDIR);
+	} else {
+		char msg[100];
+		strcat(msg, "mkdir ");
+		strcat(msg, SOURCESDIR);
+		perror(msg);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -163,11 +147,15 @@ struct passwd getLFSPasswdEntry() {
 }
 
 int main() {
+	// check if we are root
 	requireRoot();
+
+	// create essential directories
 	createLFSDirIfNotExist();
 	createToolsDirIfNotExist();
 	createSourcesDirIfNotExist();
 
+	// create lfs group and user if the don't exist yet
 	struct passwd lfsPasswdEntry;
 	int setUIDReturnCode;
 	int setGIDReturnCode;
@@ -187,6 +175,7 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
+	// build tools
 	pid = fork();
 	if (pid == -1) {
 		perror("fork");
