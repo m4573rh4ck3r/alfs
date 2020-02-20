@@ -1,33 +1,38 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <errno.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <curl/easy.h>
+#include <errno.h>
 
-void curlFile(char URL[]) {
-	CURLcode ret;
-	CURL *hnd;
+#define CURL_STATICLIB
 
-	hnd = curl_easy_init ();
-	curl_easy_setopt (hnd, CURLOPT_URL, URL);
-	curl_easy_setopt (hnd, CURLOPT_NOPROGRESS, 1L);
-	curl_easy_setopt (hnd, CURLOPT_USERAGENT, "curl/7.35.0");
-	curl_easy_setopt (hnd, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt (hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+	size_t written;
+	written = fwrite(ptr, size, nmemb, stream);
+	return written;
+}
 
-	ret = curl_easy_perform (hnd);
+void curlFile(char *url, char filename[256]) {
+    CURL *pCurl;
+    FILE *fptr;
+    CURLcode codes;
+    int returnCode;
 
-	curl_easy_cleanup (hnd);
-	hnd = NULL;
+    pCurl = curl_easy_init();
 
-	if (ret != 0) {
-		char msg[100];
-		strcat(msg, "curl ");
-		strcat(msg, URL);
-		errno = ret;
-		perror(msg);
+    if (pCurl) {
+        fptr = fopen(filename,"wb");
+        curl_easy_setopt(pCurl, CURLOPT_URL, url);
+        curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(pCurl, CURLOPT_WRITEDATA, fptr);
+        returnCode = curl_easy_perform(pCurl);
+        curl_easy_cleanup(pCurl);
+        fclose(fptr);
+
+	if (returnCode != 0) {
+		errno = returnCode;
+		perror("curl");
 		exit(EXIT_FAILURE);
 	}
+    }
 }
