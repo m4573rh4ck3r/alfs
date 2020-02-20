@@ -167,6 +167,11 @@ int main() {
 	curlFile(wgetListURL, wgetListFILE);
 	curlFile(md5sumsURL, md5sumsFILE);
 
+	// download sources
+	system("wget --input-file=/mnt/lfs/sources/wget-list --continue --directory-prefix=/mnt/lfs/sources");
+	chdir(SOURCESDIR);
+	system("md5sum -c md5sums");
+
 	// create lfs group and user if the don't exist yet
 	struct passwd lfsPasswdEntry;
 	int setUIDReturnCode;
