@@ -157,6 +157,16 @@ int main() {
 	createToolsDirIfNotExist();
 	createSourcesDirIfNotExist();
 
+	// download wget list file and checksum file
+	char *wgetListURL = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/wget-list";
+	char *md5sumsURL = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/md5sums";
+
+	char wgetListFILE[256] = "/mnt/lfs/sources/wget-list";
+	char md5sumsFILE[256] = "/mnt/lfs/sources/md5sums";
+
+	curlFile(wgetListURL, wgetListFILE);
+	curlFile(md5sumsURL, md5sumsFILE);
+
 	// create lfs group and user if the don't exist yet
 	struct passwd lfsPasswdEntry;
 	int setUIDReturnCode;
@@ -176,12 +186,6 @@ int main() {
 		perror("setuid");
 		exit(EXIT_FAILURE);
 	}
-
-	char wgetListURL[100] = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/wget-list";
-	char md5sumsURL[100] = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/md5sums";
-
-	curlFile(wgetListURL);
-	curlFile(md5sumsURL);
 
 	// build tools
 	pid = fork();
