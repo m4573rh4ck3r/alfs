@@ -29,6 +29,7 @@ void createLFSDirIfNotExist() {
 
 void createToolsDirIfNotExist() {
 	int toolsDirReturnCode;
+	int toolsDirLinkReturnCode;
 
 	toolsDirReturnCode = mkdir(TOOLSDIR, 0700);
 	if (toolsDirReturnCode == 0) {
@@ -40,6 +41,14 @@ void createToolsDirIfNotExist() {
 		strcat(msg, "mkdir ");
 		strcat(msg, TOOLSDIR);
 		perror(msg);
+		exit(EXIT_FAILURE);
+	}
+
+	toolsDirLinkReturnCode = symlink(TOOLSDIR, "/tools");
+	if (toolsDirReturnCode == 0) {
+		printf("created symlink for tools directory\n");
+	} else {
+		perror("symlink");
 		exit(EXIT_FAILURE);
 	}
 }
