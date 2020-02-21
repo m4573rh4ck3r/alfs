@@ -10,7 +10,7 @@ AC_PROG_CC
 AC_PROG_INSTALL
 # Checks for libraries.
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h stdio.h sys/types.h unistd.h curl/curl.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h errno.h string.h sys/types.h unistd.h curl/curl.h])
 # Checks for typedefs, structures, and compiler characteristics.
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
