@@ -45,11 +45,15 @@ void createToolsDirIfNotExist() {
 	}
 
 	toolsDirLinkReturnCode = symlink(TOOLSDIR, "/tools");
-	if (toolsDirReturnCode == 0) {
+	if (toolsDirLinkReturnCode == 0) {
 		printf("created symlink for tools directory\n");
 	} else {
-		perror("symlink");
-		exit(EXIT_FAILURE);
+		if (errno == EEXIST) {
+			printf("symlink /tools already exists");
+		} else {
+			perror("symlink");
+			exit(EXIT_FAILURE);
+		}
 	}
 }
 
