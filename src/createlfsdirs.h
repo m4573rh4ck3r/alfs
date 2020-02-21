@@ -49,7 +49,7 @@ void createToolsDirIfNotExist() {
 		printf("created symlink for tools directory\n");
 	} else {
 		if (errno == EEXIST) {
-			printf("symlink /tools already exists");
+			printf("symlink /tools already exists\n");
 		} else {
 			perror("symlink");
 			exit(EXIT_FAILURE);
