@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: curl
-      run: sudo apt update && sudo apt install libcurl4-openssl-dev
+      run: sudo apt update && sudo apt install libcurl-dev
     - name: autogen
       run: ./autogen.sh
     - name: configure
