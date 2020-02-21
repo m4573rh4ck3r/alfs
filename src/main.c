@@ -120,13 +120,11 @@ int main() {
 	int wgetReturnCode;
 	int checksumReturnCode;
 
-	wgetReturnCode = system("wget --input-file=/mnt/lfs/sources/wget-list --continue --directory-prefix=/mnt/lfs/sources");
-	if (wgetReturnCode != 0) {
-		errno = wgetReturnCode;
-		perror("wget");
-		exit(EXIT_FAILURE);
-	}
 	chdir(SOURCESDIR);
+	wgetReturnCode = system("wget --input-file=/mnt/lfs/sources/wget-list --continue");
+	if (wgetReturnCode != 0) {
+		printf("WARNING: wget returned an error code\n");
+	}
 	checksumReturnCode = system("md5sum -c md5sums");
 	if (checksumReturnCode != 0) {
 		errno = checksumReturnCode;
@@ -138,32 +136,33 @@ int main() {
 	struct passwd lfsPasswdEntry;
 	int setUIDReturnCode;
 	int setGIDReturnCode;
-	int pid;
 
 	lfsPasswdEntry = getLFSPasswdEntry();
 
-	setGIDReturnCode = setgid(lfsPasswdEntry.pw_gid);
-	if (setGIDReturnCode != 0) {
-		perror("setgid");
-		exit(EXIT_FAILURE);
-	}
-
-	setUIDReturnCode = setuid(lfsPasswdEntry.pw_uid);
-	if (setUIDReturnCode != 0) {
-		perror("setuid");
-		exit(EXIT_FAILURE);
-	}
-
 	// build tools
-	pid = fork();
+	int status;
+	int pid = fork();
 	if (pid == -1) {
 		perror("fork");
 		exit(EXIT_FAILURE);
 	} else if (pid == 0) {
-		wait(NULL);
-	} else {
+		int setUIDReturnCode;
+		int setGIDReturnCode;
+
+		setGIDReturnCode = setgid(lfsPasswdEntry.pw_gid);
+		if (setGIDReturnCode != 0) {
+			perror("setgid");
+			exit(EXIT_FAILURE);
+		}
+
+		setUIDReturnCode = setuid(lfsPasswdEntry.pw_uid);
+		if (setUIDReturnCode != 0) {
+			perror("setuid");
+			exit(EXIT_FAILURE);
+		}
 		printf("building tools...\n");
-		exit(0);
+	} else {
+		waitpid(pid, &status, 0);
+		printf("tools built!\n");
 	}
-	printf("tools built!\n");
 }
