@@ -10,6 +10,7 @@
 #include <string.h>
 #include "curlfile.h"
 #include "createlfsdirs.h"
+#include "lfsenv.h"
 
 #define LFS "/mnt/lfs"
 #define TOOLSDIR "/mnt/lfs/tools"
@@ -160,6 +161,8 @@ int main() {
 			perror("setuid");
 			exit(EXIT_FAILURE);
 		}
+		printf("setting up environment...\n");
+		createEnvFiles();
 		printf("building tools...\n");
 	} else {
 		waitpid(pid, &status, 0);
