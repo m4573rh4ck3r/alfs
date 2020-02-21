@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: curl
-      run: apt update && apt install curl
+      run: sudo apt update && sudo apt install curl
     - name: autogen
       run: ./autogen.sh
     - name: configure
