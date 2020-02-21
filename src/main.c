@@ -117,9 +117,22 @@ int main() {
 	curlFile(md5sumsURL, md5sumsFILE);
 
 	// download sources
-	system("wget --input-file=/mnt/lfs/sources/wget-list --continue --directory-prefix=/mnt/lfs/sources");
+	int wgetReturnCode;
+	int checksumReturnCode;
+
+	wgetReturnCode = system("wget --input-file=/mnt/lfs/sources/wget-list --continue --directory-prefix=/mnt/lfs/sources");
+	if (wgetReturnCode != 0) {
+		errno = wgetReturnCode;
+		perror("wget");
+		exit(EXIT_FAILURE);
+	}
 	chdir(SOURCESDIR);
-	system("md5sum -c md5sums");
+	checksumReturnCode = system("md5sum -c md5sums");
+	if (checksumReturnCode != 0) {
+		errno = checksumReturnCode;
+		perror("md5sum");
+		exit(EXIT_FAILURE);
+	}
 
 	// create lfs group and user if the don't exist yet
 	struct passwd lfsPasswdEntry;
