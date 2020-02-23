@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <sys/mount.h>
 
 struct Layout {
 	bool withSwap;
@@ -11,11 +12,17 @@ struct Layout {
 	bool withUsr;
 	bool withEFI;
 	char *rootSize;
+	char *rootPartition;
 	char *homeSize;
+	char *homePartition;
 	char *swapSize;
+	char *swapPartition;
 	char *bootSize;
+	char *bootPartition;
 	char *usrSize;
+	char *usrPartition;
 	char *EFISize;
+	char *EFIPartition;
 };
 
 void createPartition(char *device, int number, char *size) {
@@ -35,22 +42,33 @@ void deletePartitions(char *device) {
 	free(command);
 }
 
+char *getPartitionName(char *device, int partitionNumber) {
+	int size = snprintf(NULL, 0, "%s%d", device, partitionNumber);
+	char *partitionName = malloc(size + 1);
+	snprintf(partitionName, size + 1, "%s%d", device, partitionNumber);
+	return partitionName;
+}
+
+void createFilesystem(char *partitionName, char *type) {
+	int commandSize = snprintf(NULL, 0, "mkfs.%s %s", type, partitionName);
+	char *command = malloc(commandSize + 1);
+	snprintf(command, commandSize + 1, "mkfs.%s %s", type, partitionName);
+	system(command);
+	free(command);
+}
+
 void partition(char *device, struct Layout layout) {
 	deletePartitions(device);
 
 	int partitionCounter = 1; // counter for partition number
-	int bootNum;
-	int EFINum;
-	int swapNum;
-	int homeNum;
-	int usrNum;
-	int rootNum;
 
 	// check if a seperate /boot partition is wanted
 	if (layout.withBoot) {
 		printf("creating boot partition...\n");
 		createPartition(device, partitionCounter, layout.bootSize);
-		bootNum = partitionCounter;
+		layout.bootPartition = getPartitionName(device, partitionCounter);
+		createFilesystem(layout.bootPartition, "ext4");
+
 		partitionCounter++;
 	}
 
@@ -58,7 +76,9 @@ void partition(char *device, struct Layout layout) {
 	if (layout.withEFI) {
 		printf("creating efi partition...\n");
 		createPartition(device, partitionCounter, layout.EFISize);
-		EFINum = partitionCounter;
+		layout.EFIPartition = getPartitionName(device, partitionCounter);
+		createFilesystem(layout.EFIPartition, "fat -F32");
+
 		partitionCounter++;
 	}
 
@@ -66,7 +86,21 @@ void partition(char *device, struct Layout layout) {
 	if (layout.withSwap) {
 		printf("creating swap partition...\n");
 		createPartition(device, partitionCounter, layout.swapSize);
-		swapNum = partitionCounter;
+
+		layout.swapPartition = getPartitionName(device, partitionCounter);
+
+		int mkswapCommandSize = snprintf(NULL, 0, "mkswap %s", layout.swapPartition);
+		char *mkswapCommand = malloc(mkswapCommandSize  + 1);
+		snprintf(mkswapCommand, mkswapCommandSize + 1, "mkswap %s", layout.swapPartition);
+		system(mkswapCommand);
+		free(mkswapCommand);
+
+		int swaponCommandSize = snprintf(NULL, 0, "swapon %s", layout.swapPartition);
+		char *swaponCommand = malloc(swaponCommandSize + 1);
+		snprintf(swaponCommand, swaponCommandSize + 1, "swapon %s", layout.swapPartition);
+		system(swaponCommand);
+		free(swaponCommand);
+
 		partitionCounter++;
 	}
 
@@ -74,7 +108,9 @@ void partition(char *device, struct Layout layout) {
 	if (layout.withHome) {
 		printf("creating home partition...\n");
 		createPartition(device, partitionCounter, layout.homeSize);
-		homeNum = partitionCounter;
+		layout.homePartition = getPartitionName(device, partitionCounter);
+		createFilesystem(layout.homePartition, "ext4");
+
 		partitionCounter++;
 	}
 
@@ -82,7 +118,9 @@ void partition(char *device, struct Layout layout) {
 	if (layout.withUsr) {
 		printf("creating usr partition\n");
 		createPartition(device, partitionCounter, layout.usrSize);
-		usrNum = partitionCounter;
+		layout.usrPartition = getPartitionName(device, partitionCounter);
+		createFilesystem(layout.usrPartition, "ext4");
+
 		partitionCounter++;
 	}
 	printf("creating root partition...\n");
@@ -93,5 +131,49 @@ void partition(char *device, struct Layout layout) {
 		char *rootSize = "0";
 		createPartition(device, partitionCounter, rootSize);
 	}
-	rootNum = partitionCounter;
+
+	createFilesystem(getPartitionName(device, partitionCounter), "ext4");
+}
+
+void mountPartition(char *src, char *dst, char *type) {
+	const unsigned long mntFlags = 0;
+	const char* opts = "mode=0700";
+	if (mount(src, dst, type, mntFlags, opts) == -1) {
+		perror("mount");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void mountLFSPartitions(struct Layout *layout) {
+	mountPartition(layout->rootPartition, LFS, "ext4");
+	
+	if (layout->withBoot) {
+		int bootMpSize = snprinf(NULL, 0, "%s/boot", LFS);
+		char *bootMp = malloc( bootMpSize + 1);
+		snprintf(bootMp, bootMpSize + 1, "%s/boot", LFS);
+		mountPartition(layout->bootPartition, bootMp, "ext4");
+		free(bootMp);
+	}
+
+	if (layout->withEFI) {
+		int efiMpSize = snprintf(NULL, 0, "%s/boot/efi", LFS);
+		char *efiMp = malloc(efiMpSize + 1);
+		snprintf(efiMp, efiMpSize + 1, "%s/boot/efi", LFS);
+		mountPartition(layout->EFIPartition, efiMp, "vfat");
+		free(efiMp);
+	}
+	if (layout->withHome) {
+		int homeMpSize = snprintf(NULL, 0, "%s/home", LFS);
+		char *homeMp = malloc(homeMpSize + 1);
+		snprintf(homeMp, homeMpSize + 1, "%s/home", LFS);
+		mountPartition(layout->homePartition, homeMp, "ext4");
+		free(homeMp);
+	}
+	if (layout->withUsr) {
+		int usrMpSize = snprintf(NULL, 0, "%s/usr", LFS);
+		char *usrMp = malloc(usrMpSize + 1);
+		snprintf(usrMp, usrMpSize + 1, "%s/usr", LFS);
+		mountPartition(layout->usrPartition, usrMp, "ext4");
+		free(usrMp);
+	}
 }
