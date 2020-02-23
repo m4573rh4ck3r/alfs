@@ -35,15 +35,15 @@ int main() {
 	createToolsDirIfNotExist();
 	createSourcesDirIfNotExist();
 
-	struct Layout layout {};
+	struct Layout layout = {};
 	strcpy(layout.EFISize, "2000000K");
-	strcpy(layout.SwapSize, "16000000K");
-	strcpy(layout.BootSize, "10000000K");
-	layout.WithSwap = true;
-	layout.WithHome = false;
-	layout.WithUsr = false;
-	layout.WithBoot = true;
-	layout.WithEFI = true;
+	strcpy(layout.swapSize, "16000000K");
+	strcpy(layout.bootSize, "10000000K");
+	layout.withSwap = true;
+	layout.withHome = false;
+	layout.withUsr = false;
+	layout.withBoot = true;
+	layout.withEFI = true;
 
 	partition("/dev/sdc", layout);
 

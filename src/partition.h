@@ -2,18 +2,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 struct Layout {
-	bool WithSwap;
-	bool WithHome;
-	bool WithBoot;
-	bool WithUsr;
+	bool withSwap;
+	bool withHome;
+	bool withBoot;
+	bool withUsr;
 	bool withEFI;
-	char *RootSize;
-	char *HomeSize;
-	char *SwapSize;
-	char *BootSize;
-	char *UsrSize;
+	char *rootSize;
+	char *homeSize;
+	char *swapSize;
+	char *bootSize;
+	char *usrSize;
 	char *EFISize;
 };
 
@@ -46,43 +47,43 @@ void partition(char *device, struct Layout layout) {
 
 
 	// check if a seperate /boot partition is wanted
-	if (layout.WithBoot) {
-		createPartition(device, partitionCounter, layout.BootSize);
+	if (layout.withBoot) {
+		createPartition(device, partitionCounter, layout.bootSize);
 		bootNum = partitionCounter;
 		partitionCounter++;
 	}
 
 	// check if an EFI partition is wanted
-	if (layout.WithEFI) {
+	if (layout.withEFI) {
 		createPartition(device, partitionCounter, layout.EFISize);
 		EFINum = partitionCounter;
 		partitionCounter++;
 	}
 
 	// check if a Swap partition is wanted
-	if (layout.WithSwap) {
-		createPartition(device, partitionCounter, layout.SwapSize);
+	if (layout.withSwap) {
+		createPartition(device, partitionCounter, layout.swapSize);
 		swapNum = partitionCounter;
 		partitionCounter++;
 	}
 
 	// check if a seperate /home partition is wanted
-	if (layout.WithHome) {
-		createPartition(device, partitionCounter, layout.HomeSize);
+	if (layout.withHome) {
+		createPartition(device, partitionCounter, layout.homeSize);
 		homeNum = partitionCounter;
 		partitionCounter++;
 	}
 
 	// check if a seperate /usr partition is wanted
-	if (layout.WithUsr) {
-		createPartition(device, partitionCounter, layout.UsrSize);
+	if (layout.withUsr) {
+		createPartition(device, partitionCounter, layout.usrSize);
 		usrNum = partitionCounter;
 		partitionCounter++;
 	}
 
 	// check if root partition size is provided otherwise use remaining disk space
-	if (&layout.RootSize != NULL) {
-		createPartition(device, partitionCounter, layout.RootSize);
+	if (&layout.rootSize != NULL) {
+		createPartition(device, partitionCounter, layout.rootSize);
 	} else {
 		char *rootSize = "0";
 		createPartition(device, partitionCounter, rootSize);
