@@ -19,9 +19,9 @@ struct Layout {
 };
 
 void createPartition(char *device, int number, char *size) {
-	int commandSize = snprintf(NULL, 0, "sgdisk -n %d:0:%s %s", number, size, device);
+	int commandSize = snprintf(NULL, 0, "sgdisk -n %d:0:+%s %s", number, size, device);
 	char *command = malloc(commandSize + 1);
-	snprintf(command, commandSize + 1, "sgdisk -n %d:0:%s %s", number, size, device);
+	snprintf(command, commandSize + 1, "sgdisk -n %d:0:+%s %s", number, size, device);
 	system(command);
 	free(command);
 }
