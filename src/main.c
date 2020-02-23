@@ -35,16 +35,24 @@ int main() {
 	createToolsDirIfNotExist();
 	createSourcesDirIfNotExist();
 
-	struct Layout layout = {};
-	strcpy(layout.EFISize, "2000000K");
-	strcpy(layout.swapSize, "16000000K");
-	strcpy(layout.bootSize, "10000000K");
+	struct Layout layout = {0};
+	char *efiSize = "2000000K";
+	char *swapSize = "16000000K";
+	char *bootSize = "10000000K";
+	char *rootSize = "0";
+
+	layout.EFISize = efiSize;
+	layout.swapSize = swapSize;
+	layout.bootSize = bootSize;
+	layout.rootSize = rootSize;
+
 	layout.withSwap = true;
 	layout.withHome = false;
 	layout.withUsr = false;
 	layout.withBoot = true;
 	layout.withEFI = true;
 
+	printf("creating partitions...\n");
 	partition("/dev/sdc", layout);
 
 	// download wget list file and checksum file
