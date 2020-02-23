@@ -88,4 +88,5 @@ struct Alfs unmarshalAlfs(int argc, char **argv) {
 				exit(EXIT_FAILURE);
 		}
 	}
+	return alfs;
 }
