@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include "partition.h"
+
 #define VERSION = "v0.1"
 
 const char *Help =
@@ -47,31 +49,29 @@ struct Alfs unmarshalAlfs(int argc, char **argv) {
 	while ((opt = getopt (argc, argv, "R:B:S:E:H:U:vVh")) != -1) {
 		switch (opt){
 			case 'R':
-				printf("R: %s\n", optarg);
 				alfs.layout.rootSize = optarg;
 				break;
 			case 'B':
-				printf("B: %s\n", optarg);
+				alfs.layout.withBoot = true;
 				alfs.layout.bootSize = optarg;
 				break;
 			case 'S':
-				printf("S: %s\n", optarg);
+				alfs.layout.withSwap = true;
 				alfs.layout.swapSize = optarg;
 				break;
 			case 'E':
-				printf("E: %s\n", optarg);
+				alfs.layout.withEFI = true;
 				alfs.layout.EFISize = optarg;
 				break;
 			case 'H':
-				printf("H: %s\n", optarg);
+				alfs.layout.withHome = true;
 				alfs.layout.homeSize = optarg;
 				break;
 			case 'U':
-				printf("U: %s\n", optarg);
+				alfs.layout.withUsr = true;
 				alfs.layout.usrSize = optarg;
 				break;
 			case 'v':
-				printf("verbose\n", optarg);
 				alfs.verbose = true;
 				break;
 			case 'V':
@@ -87,6 +87,9 @@ struct Alfs unmarshalAlfs(int argc, char **argv) {
 				perror("alfs");
 				exit(EXIT_FAILURE);
 		}
+	}
+	if (alfs.layout.rootSize == NULL) {
+		alfs.layout.rootSize = "0";
 	}
 	return alfs;
 }

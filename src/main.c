@@ -10,9 +10,9 @@
 
 #include "curlfile.h"
 #include "createlfsdirs.h"
+#include "lfscli.h"
 #include "lfsenv.h"
 #include "lfsuser.h"
-#include "partition.h"
 
 #define LFS "/mnt/lfs"
 #define TOOLSDIR "/mnt/lfs/tools"
@@ -26,15 +26,18 @@ void requireRoot() {
 	}
 }
 
-int main() {
+int main(int argc, char **argv) {
 	// check if we are root
 	requireRoot();
+
+	struct Alfs alfs = {0};
+	alfs = unmarshalAlfs(argc, argv);
 
 	// create essential directories
 	createLFSDirIfNotExist();
 	createToolsDirIfNotExist();
 	createSourcesDirIfNotExist();
-
+/*
 	struct Layout layout = {0};
 	char *efiSize = "2000000K";
 	char *swapSize = "16000000K";
@@ -50,10 +53,13 @@ int main() {
 	layout.withHome = false;
 	layout.withUsr = false;
 	layout.withBoot = true;
-	layout.withEFI = true;
+	layout.withEFI = true;*/
 
 	printf("creating partitions...\n");
-	partition("/dev/sdc", layout);
+	partition("/dev/sdc", &alfs.layout);
+
+	printf("mounting partitions...\n");
+	mountLFSPartitions(alfs.layout);
 
 	// download wget list file and checksum file
 	char *wgetListURL = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/wget-list";

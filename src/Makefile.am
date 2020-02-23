@@ -1,4 +1,4 @@
 bin_PROGRAMS = alfs
 alfs_SOURCES = main.c
 alfs_LDADD = -lcurl
-include_HEADERS = createlfsdirs.h curlfile.h lfscli.h lfsenv.h lfsuser.h partition.h
+include_HEADERS = createlfsdirs.h curlfile.h partition.h lfscli.h lfsenv.h lfsuser.h
