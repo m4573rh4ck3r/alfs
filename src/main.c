@@ -12,6 +12,7 @@
 #include "createlfsdirs.h"
 #include "lfsenv.h"
 #include "lfsuser.h"
+#include "partition.h"
 
 #define LFS "/mnt/lfs"
 #define TOOLSDIR "/mnt/lfs/tools"
@@ -33,6 +34,18 @@ int main() {
 	createLFSDirIfNotExist();
 	createToolsDirIfNotExist();
 	createSourcesDirIfNotExist();
+
+	struct Layout layout {};
+	strcpy(layout.EFISize, "2000000K");
+	strcpy(layout.SwapSize, "16000000K");
+	strcpy(layout.BootSize, "10000000K");
+	layout.WithSwap = true;
+	layout.WithHome = false;
+	layout.WithUsr = false;
+	layout.WithBoot = true;
+	layout.WithEFI = true;
+
+	partition("/dev/sdc", layout);
 
 	// download wget list file and checksum file
 	char *wgetListURL = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/wget-list";
