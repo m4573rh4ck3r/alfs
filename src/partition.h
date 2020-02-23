@@ -139,7 +139,7 @@ void partition(char *device, struct Layout *layout) {
 void mountPartition(char *src, char *dst, char *type) {
 	const unsigned long mntFlags = 0;
 	const char* opts = "mode=0700,uid=65534";
-	if (mount(src, dst, type, mntFlags, opts) == -1) {
+	if (mount(src, dst, type, mntFlags, "") == -1) {
 		perror("mount");
 		exit(EXIT_FAILURE);
 	}
