@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <string.h>
 #include <stdbool.h>
 #include <sys/mount.h>
 
@@ -136,10 +137,15 @@ void partition(char *device, struct Layout *layout) {
 	createFilesystem(layout->rootPartition, "ext4");
 }
 
-void mountPartition(char *src, char *dst, char *type) {
-	const unsigned long mntFlags = 0;
-	const char* opts = "mode=0700,uid=65534";
-	if (mount(src, dst, type, mntFlags, "") == -1) {
+void mountPartition(char *s, char *d, char *t) {
+	const char *src = s;
+	const char *dst = d;
+	const char *type = t;
+	const unsigned long mntflags = 0;
+	const char *opts = "mode=0755,uid=65534";
+
+	int returnCode = mount(src, dst, type, mntflags, opts);
+	if (returnCode == -1) {
 		perror("mount");
 		exit(EXIT_FAILURE);
 	}
