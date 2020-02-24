@@ -35,31 +35,15 @@ int main(int argc, char **argv) {
 
 	// create essential directories
 	createLFSDirIfNotExist();
-	createToolsDirIfNotExist();
-	createSourcesDirIfNotExist();
-/*
-	struct Layout layout = {0};
-	char *efiSize = "2000000K";
-	char *swapSize = "16000000K";
-	char *bootSize = "10000000K";
-	char *rootSize = "0";
-
-	layout.EFISize = efiSize;
-	layout.swapSize = swapSize;
-	layout.bootSize = bootSize;
-	layout.rootSize = rootSize;
-
-	layout.withSwap = true;
-	layout.withHome = false;
-	layout.withUsr = false;
-	layout.withBoot = true;
-	layout.withEFI = true;*/
 
 	printf("creating partitions...\n");
 	partition("/dev/sdc", &alfs.layout);
 
 	printf("mounting partitions...\n");
 	mountLFSPartitions(alfs.layout);
+
+	createToolsDirIfNotExist();
+	createSourcesDirIfNotExist();
 
 	// download wget list file and checksum file
 	char *wgetListURL = "http://www.linuxfromscratch.org/lfs/view/stable-systemd/wget-list";
