@@ -142,7 +142,6 @@ void mountPartition(char *s, char *d, char *t) {
 	const char *dst = d;
 	const char *type = t;
 	const unsigned long mntflags = 0;
-	const char *opts = "mode=0755,uid=65534";
 
 	int returnCode = mount(src, dst, type, mntflags, NULL);
 	if (returnCode == -1) {
