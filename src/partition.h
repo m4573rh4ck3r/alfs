@@ -116,7 +116,7 @@ void partition(char *device, struct Layout *layout) {
 	}
 
 	// check if a seperate /usr partition is wanted
-	if (&layout->withUsr != NULL && &layout->withUser) {
+	if (&layout->withUsr != NULL && &layout->withUsr) {
 		printf("creating usr partition\n");
 		createPartition(device, partitionCounter, layout->usrSize);
 		layout->usrPartition = getPartitionName(device, partitionCounter);
