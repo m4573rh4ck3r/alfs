@@ -64,7 +64,7 @@ void partition(char *device, struct Layout *layout) {
 	int partitionCounter = 1; // counter for partition number
 
 	// check if a seperate /boot partition is wanted
-	if (layout->withBoot) {
+	if (&layout->withBoot != NULL && &layout->withBoot) {
 		printf("creating boot partition...\n");
 		createPartition(device, partitionCounter, layout->bootSize);
 		layout->bootPartition = getPartitionName(device, partitionCounter);
@@ -74,7 +74,7 @@ void partition(char *device, struct Layout *layout) {
 	}
 
 	// check if an EFI partition is wanted
-	if (layout->withEFI) {
+	if (&layout->withEFI != NULL && &layout->withEFI) {
 		printf("creating efi partition...\n");
 		createPartition(device, partitionCounter, layout->EFISize);
 		layout->EFIPartition = getPartitionName(device, partitionCounter);
@@ -84,7 +84,7 @@ void partition(char *device, struct Layout *layout) {
 	}
 
 	// check if a Swap partition is wanted
-	if (layout->withSwap) {
+	if (&layout->withSwap != NULL && &layout->withSwap) {
 		printf("creating swap partition...\n");
 		createPartition(device, partitionCounter, layout->swapSize);
 
@@ -106,7 +106,7 @@ void partition(char *device, struct Layout *layout) {
 	}
 
 	// check if a seperate /home partition is wanted
-	if (layout->withHome) {
+	if (&layout->withHome != NULL && &layout->withHome) {
 		printf("creating home partition...\n");
 		createPartition(device, partitionCounter, layout->homeSize);
 		layout->homePartition = getPartitionName(device, partitionCounter);
@@ -116,7 +116,7 @@ void partition(char *device, struct Layout *layout) {
 	}
 
 	// check if a seperate /usr partition is wanted
-	if (layout->withUsr) {
+	if (&layout->withUsr != NULL && &layout->withUser) {
 		printf("creating usr partition\n");
 		createPartition(device, partitionCounter, layout->usrSize);
 		layout->usrPartition = getPartitionName(device, partitionCounter);
